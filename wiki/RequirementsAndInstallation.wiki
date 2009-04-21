@@ -1,0 +1,43 @@
+#summary Installation, Usage and Requirements for using PHP Mime Mail Parser
+
+= Requirements =
+
+PHP Mime Mail Parser requires [http://pecl.php.net/package/mailparse MailParse] extension and PHP5+.
+
+
+== MailParse ==
+
+The MailParse extension is can be downloaded from here:
+http://pecl.php.net/package/mailparse
+
+It also depends on [http://www.php.net/mbstring mbstring]. Mbstring is available in PHP but not enabled by default. see: http://www.php.net/manual/en/mbstring.installation.php
+
+= Installation =
+
+Once you have enabled MailParse support in your PHP build, you can download the latest source for the MimeMailParser Class from: http://code.google.com/p/php-mime-mail-parser/source/browse/trunk/MimeMailParser.class.php
+
+= Usage =
+
+Once you have the MimeMailParser class, include it in your PHP file. The documentation is in PHPDoc syntax. The doc explains what each method does. 
+
+Example code:
+
+{{{
+<?php
+
+require_once('MimeMailParser.class.php');
+
+$path = 'path/to/mail.txt';
+$Parser = new MimeMailParser();
+$Parser->setPath($path);
+
+$to = $Parser->getHeader('to');
+$from = $Parser->getHeader('from');
+$subject = $Parser->getHeader('subject');
+$text = $Parser->getMessageBody('text');
+$html = $Parser->getMessageBody('html');
+//$attachments = $Parser->getAttachments();
+$attachments = $Parser->getAttachmentsAsStreams();
+
+?>
+}}}
