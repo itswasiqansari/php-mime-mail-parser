@@ -75,8 +75,26 @@ class MimeMailParser {
 	 * @param $stream Resource
 	 */
 	public function setStream($stream) {
+
+		// streams have to be cached to file first
+		if (get_resource_type($stream) == 'stream') {
+			$tmp_fp = tmpfile();
+			if ($tmp_fp) {
+				while(!feof($stream)) {
+					fwrite($tmp_fp, fread($stream, 2028));
+				}
+				fseek($tmp_fp, 0);
+				$this->stream =& $tmp_fp;
+			} else {
+				throw new Exception('Could not create temporary files for attachments. Your tmp directory may be unwritable by PHP.');
+				return false;
+			}
+			fclose($stream);
+		} else {
+			$this->stream = $stream;
+		}
+		
 		$this->resource = mailparse_msg_create();
-		$this->stream = $stream;
 		// parses the message incrementally low memory usage but slower
 		while(!feof($this->stream)) {
 			mailparse_msg_parse($this->resource, fread($this->stream, 2082));
