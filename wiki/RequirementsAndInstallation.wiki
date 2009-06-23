@@ -12,6 +12,26 @@ http://pecl.php.net/package/mailparse
 
 It also depends on [http://www.php.net/mbstring mbstring]. Mbstring is available in PHP but not enabled by default. see: http://www.php.net/manual/en/mbstring.installation.php
 
+To install mailparse you'll need the php-devel package. 
+
+You can install this through your package manager. 
+Example:
+{{{
+sudo apt-get install php5-devel 
+yum install php5-devel
+}}}
+etc. 
+
+This will give you the commands that allow compiling PHP PECL extensions.
+
+Then follow the directions on installing a PHP PECL extension through the pecl command. 
+
+http://php.net/manual/en/install.pecl.pear.php
+
+or 
+
+http://php.mirror.facebook.net/manual/en/install.pecl.phpize.php
+
 = Installation =
 
 Once you have enabled MailParse support in your PHP build, you can download the latest source for the MimeMailParser Class from: http://code.google.com/p/php-mime-mail-parser/source/browse/trunk/MimeMailParser.class.php
