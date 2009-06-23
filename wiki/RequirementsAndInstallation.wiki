@@ -18,6 +18,9 @@ You can install this through your package manager.
 Example:
 {{{
 sudo apt-get install php5-devel 
+}}}
+or 
+{{{
 yum install php5-devel
 }}}
 etc. 
@@ -26,11 +29,40 @@ This will give you the commands that allow compiling PHP PECL extensions.
 
 Then follow the directions on installing a PHP PECL extension through the pecl command. 
 
-http://php.net/manual/en/install.pecl.pear.php
+http://php.net/manual/en/install.pecl.phpize.php
 
-or 
+Basically you want to download the latest version of mailparse:
 
-http://php.mirror.facebook.net/manual/en/install.pecl.phpize.php
+eg: 
+
+{{{
+wget http://pecl.php.net/get/mailparse-2.1.5.tgz
+}}}
+
+2.1.5 is the latest stable as of this writing. You'll need the latest version from:
+http://pecl.php.net/package/mailparse
+
+Extract the archive:
+{{{
+tar -xzvf mailparse-2.1.5.tgz
+}}}
+
+change to the directory you just decompressed:
+{{{
+cd mailparse-2.1.5
+}}}
+
+Then build and install it through:
+
+{{{
+phpize
+./configure
+make
+make install
+}}}
+
+Here is a good guide on installing PHP PECL extensions:
+http://mattiasgeniar.be/2008/09/14/how-to-compile-and-install-php-extensions-from-source/
 
 = Installation =
 
