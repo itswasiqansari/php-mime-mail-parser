@@ -143,6 +143,18 @@ class MimeMailParser {
 		}
 		return false;
 	}
+	/**
+	 * Retrieve the raw Email Headers
+	 * @return string
+	 */
+	public function getHeadersRaw() {
+		if (isset($this->parts[1])) {
+			return $this->getPartHeaderRaw($this->parts[1]);
+		} else {
+			throw new Exception('MimeMailParser::setPath() or MimeMailParser::setText() must be called before retrieving email headers.');
+		}
+		return false;
+	}
 	
 	/**
 	 * Retrieve a specific Email Header
@@ -185,32 +197,72 @@ class MimeMailParser {
 	}
 	
 	/**
-	 * Returns the attachments
+	 * Returns the mime-types of attachments in order of appearance
+	 * @return Array
+	 * @param $type Object[optional]
+	 */
+	public function getAttachmentsTypes() {
+		$types = array();
+		$disposition = array("attachment","inline");
+		foreach($this->parts as $part) {
+			foreach($disposition as $disp) {
+				if ($this->getPartContentDisposition($part) == $disp) {
+					$types[] = $this->getPartContentType($part);
+				}
+			}
+		}
+		return $types;
+	}
+	/**
+	 * Returns the filenames of attachments in order of appearance
+	 * @return Array
+	 * @param $type Object[optional]
+	 */
+	public function getAttachmentsFilenames() {
+		$filenames = array();
+		$disposition = array("attachment","inline");
+		foreach($this->parts as $part) {
+			foreach($disposition as $disp) {
+				if ($this->getPartContentDisposition($part) == $disp) {
+					if (isset($part['disposition-filename'])) {
+						$filenames[] = $part['disposition-filename'];
+					}
+				}
+			}
+		}
+		return $filenames;
+	}
+	/**
+	 * Returns the attachments contents in order of appearance
 	 * @return Array
 	 * @param $type Object[optional]
 	 */
 	public function getAttachments() {
 		$attachments = array();
-		$disposition = 'attachment';
+		$disposition = array("attachment","inline");
 		foreach($this->parts as $part) {
-			if ($this->getPartContentDisposition($part) == $disposition) {
-				$attachments[] = base64_decode($this->getPartBody($part));
+			foreach($disposition as $disp) {
+				if ($this->getPartContentDisposition($part) == $disp) {
+					$attachments[] = base64_decode($this->getPartBody($part));
+				}
 			}
 		}
 		return $attachments;
 	}
 	
 	/**
-	 * Returns the attachments as stream resources (file pointers)
+	 * Returns the attachments as stream resources (file pointers) in order of appearance
 	 * @return Array
 	 * @param $type Object[optional]
 	 */
 	public function getAttachmentsAsStreams() {
 		$attachments = array();
-		$disposition = 'attachment';
+		$disposition = array("attachment","inline");
 		foreach($this->parts as $part) {
-			if ($this->getPartContentDisposition($part) == $disposition) {
-				$attachments[] = $this->getAttachmentStream($part);
+			foreach($disposition as $disp) {
+				if ($this->getPartContentDisposition($part) == $disp) {
+					$attachments[] = $this->getAttachmentStream($part);
+				}
 			}
 		}
 		array_merge($this->attachment_streams, $attachments);
@@ -267,6 +319,22 @@ class MimeMailParser {
 	}
 	
 	/**
+	 * Retrieve the raw Header of a MIME part
+	 * @return String
+	 * @param $part Object
+	 */
+	private function getPartHeaderRaw(&$part) {
+		$header = '';
+		if ($this->stream) {
+			$header = $this->getPartHeaderFromFile($part);
+		} else if ($this->data) {
+			$header = $this->getPartHeaderFromText($part);
+		} else {
+			throw new Exception('MimeMailParser::setPath() or MimeMailParser::setText() must be called before retrieving email parts.');
+		}
+		return $header;
+	}
+	/**
 	 * Retrieve the Body of a MIME part
 	 * @return String
 	 * @param $part Object
@@ -284,6 +352,18 @@ class MimeMailParser {
 	}
 	
 	/**
+	 * Retrieve the Header from a MIME part from file
+	 * @return String Mime Header Part
+	 * @param $part Array
+	 */
+	private function getPartHeaderFromFile(&$part) {
+		$start = $part['starting-pos'];
+		$end = $part['starting-pos-body'];
+		fseek($this->stream, $start, SEEK_SET);
+		$header = fread($this->stream, $end-$start);
+		return $header;
+	}
+	/**
 	 * Retrieve the Body from a MIME part from file
 	 * @return String Mime Body Part
 	 * @param $part Array
@@ -296,6 +376,17 @@ class MimeMailParser {
 		return $body;
 	}
 	
+	/**
+	 * Retrieve the Header from a MIME part from text
+	 * @return String Mime Header Part
+	 * @param $part Array
+	 */
+	private function getPartHeaderFromText(&$part) {
+		$start = $part['starting-pos'];
+		$end = $part['starting-pos-body'];
+		$header = substr($this->data, $start, $end-$start);
+		return $header;
+	}
 	/**
 	 * Retrieve the Body from a MIME part from text
 	 * @return String Mime Body Part
