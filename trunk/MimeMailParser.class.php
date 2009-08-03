@@ -1,5 +1,7 @@
 <?php
 
+require_once('attachment.class.php');
+
 /**
  * Fast Mime Mail parser Class using PHP's MailParse Extension
  * @author gabe@fijiwebdesign.com
@@ -197,75 +199,25 @@ class MimeMailParser {
 	}
 	
 	/**
-	 * Returns the mime-types of attachments in order of appearance
-	 * @return Array
-	 * @param $type Object[optional]
-	 */
-	public function getAttachmentsTypes() {
-		$types = array();
-		$disposition = array("attachment","inline");
-		foreach($this->parts as $part) {
-			foreach($disposition as $disp) {
-				if ($this->getPartContentDisposition($part) == $disp) {
-					$types[] = $this->getPartContentType($part);
-				}
-			}
-		}
-		return $types;
-	}
-	/**
-	 * Returns the filenames of attachments in order of appearance
-	 * @return Array
-	 * @param $type Object[optional]
-	 */
-	public function getAttachmentsFilenames() {
-		$filenames = array();
-		$disposition = array("attachment","inline");
-		foreach($this->parts as $part) {
-			foreach($disposition as $disp) {
-				if ($this->getPartContentDisposition($part) == $disp) {
-					if (isset($part['disposition-filename'])) {
-						$filenames[] = $part['disposition-filename'];
-					}
-				}
-			}
-		}
-		return $filenames;
-	}
-	/**
 	 * Returns the attachments contents in order of appearance
 	 * @return Array
 	 * @param $type Object[optional]
 	 */
 	public function getAttachments() {
 		$attachments = array();
-		$disposition = array("attachment","inline");
+		$dispositions = array("attachment","inline");
 		foreach($this->parts as $part) {
-			foreach($disposition as $disp) {
-				if ($this->getPartContentDisposition($part) == $disp) {
-					$attachments[] = base64_decode($this->getPartBody($part));
-				}
+			$disposition = $this->getPartContentDisposition($part);
+			if (in_array($disposition, $dispositions)) {
+				$attachments[] = new MimeMailParser_attachment(
+					$part['disposition-filename'], 
+					$this->getPartContentType($part), 
+					$this->getAttachmentStream($part),
+					$disposition,
+					$this->getPartHeaders($part)
+				);
 			}
 		}
-		return $attachments;
-	}
-	
-	/**
-	 * Returns the attachments as stream resources (file pointers) in order of appearance
-	 * @return Array
-	 * @param $type Object[optional]
-	 */
-	public function getAttachmentsAsStreams() {
-		$attachments = array();
-		$disposition = array("attachment","inline");
-		foreach($this->parts as $part) {
-			foreach($disposition as $disp) {
-				if ($this->getPartContentDisposition($part) == $disp) {
-					$attachments[] = $this->getAttachmentStream($part);
-				}
-			}
-		}
-		array_merge($this->attachment_streams, $attachments);
 		return $attachments;
 	}
 	
@@ -423,11 +375,11 @@ class MimeMailParser {
 					fwrite($temp_fp, base64_decode($part));
 					$written += $write;
 				}
-				fseek($temp_fp, 0, SEEK_SET);
-			} else if ($this->text) {
+			} else if ($this->data) {
 				$attachment = base64_decode($this->getPartBodyFromText($part));
 				fwrite($temp_fp, $attachment, strlen($attachment));
 			}
+			fseek($temp_fp, 0, SEEK_SET);
 		} else {
 			throw new Exception('Could not create temporary files for attachments. Your tmp directory may be unwritable by PHP.');
 			return false;
