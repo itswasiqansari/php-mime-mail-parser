@@ -357,7 +357,10 @@ class MimeMailParser {
 	 * @param $part Array
 	 */
 	private function getAttachmentStream(&$part) {
-		$temp_fp = tmpfile();
+		$temp_fp = tmpfile();   
+
+        $encoding = $part['headers']['content-transfer-encoding'];
+
 		if ($temp_fp) {
 			if ($this->stream) {
 				$start = $part['starting-pos-body'];
@@ -372,11 +375,11 @@ class MimeMailParser {
 						$write = $len - $written;
 					}
 					$part = fread($this->stream, $write);
-					fwrite($temp_fp, base64_decode($part));
+					fwrite($temp_fp, $this->decode($part, $encoding));
 					$written += $write;
 				}
 			} else if ($this->data) {
-				$attachment = base64_decode($this->getPartBodyFromText($part));
+				$attachment = $this->decode($this->getPartBodyFromText($part), $encoding);
 				fwrite($temp_fp, $attachment, strlen($attachment));
 			}
 			fseek($temp_fp, 0, SEEK_SET);
@@ -386,7 +389,24 @@ class MimeMailParser {
 		}
 		return $temp_fp;
 	}
-	
+
+    
+    /**
+     * Decode the string depending on encoding type.
+     * @return String the decoded string.
+     * @param $encodedString    The string in its original encoded state.
+     * @param $encodingType     The encoding type from the Content-Transfer-Encoding header of the part.
+     */
+    private function decode($encodedString, $encodingType) {
+        if ($encodingType == 'base64') {
+        	return base64_decode($encodedString);
+        } else if ($encodingType == 'quoted-printable') {
+        	 return quoted_printable_decode($encodedString);
+        } else {
+        	return $encodedString;
+        }
+    }
+
 }
 
 
