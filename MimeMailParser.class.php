@@ -189,7 +189,8 @@ class MimeMailParser {
 		if (in_array($type, array_keys($mime_types))) {
 			foreach($this->parts as $part) {
 				if ($this->getPartContentType($part) == $mime_types[$type]) {
-					$body = $this->getPartBody($part);
+                    $headers = $this->getPartHeaders($type);
+					$body = $this->decode($this->getPartBody($part), $headers['content-transfer-encoding']);
 				}
 			}
 		} else {
@@ -197,6 +198,30 @@ class MimeMailParser {
 		}
 		return $body;
 	}
+
+	/**
+	 * get the headers for the message body part.
+	 * @return Array
+	 * @param $type Object[optional]
+	 */
+	public function getMessageBodyHeaders($type = 'text') {
+		$headers = false;
+		$mime_types = array(
+			'text'=> 'text/plain',
+			'html'=> 'text/html'
+		);
+		if (in_array($type, array_keys($mime_types))) {
+			foreach($this->parts as $part) {
+				if ($this->getPartContentType($part) == $mime_types[$type]) {
+					$headers = $this->getPartHeaders($part);
+				}
+			}
+		} else {
+			throw new Exception('Invalid type specified for MimeMailParser::getMessageBody. "type" can either be text or html.');
+		}
+		return $headers;
+	}
+
 	
 	/**
 	 * Returns the attachments contents in order of appearance
