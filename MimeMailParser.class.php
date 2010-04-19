@@ -189,7 +189,7 @@ class MimeMailParser {
 		if (in_array($type, array_keys($mime_types))) {
 			foreach($this->parts as $part) {
 				if ($this->getPartContentType($part) == $mime_types[$type]) {
-                    $headers = $this->getPartHeaders($type);
+                    $headers = $this->getPartHeaders($part);
 					$body = $this->decode($this->getPartBody($part), $headers['content-transfer-encoding']);
 				}
 			}
