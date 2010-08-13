@@ -122,7 +122,7 @@ class MimeMailParser_attachment {
 	 * to be retrieved as public properties
 	 * @param $name Object
 	 */
-	private function __get($name) {
+	public function __get($name) {
 		if ($name == 'content') {
 			return $this->getContent();
 		} else if ($name == 'extension') {
