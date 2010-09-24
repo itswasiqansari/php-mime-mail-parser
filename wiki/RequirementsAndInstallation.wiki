@@ -107,5 +107,6 @@ foreach($attachments as $attachment) {
     }
     fclose($fp);
   }
-}}}
 }
+
+}}}
