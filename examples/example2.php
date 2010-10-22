@@ -15,8 +15,7 @@ $from = $Parser->getHeader('from');
 $subject = $Parser->getHeader('subject');
 $text = $Parser->getMessageBody('text');
 $html = $Parser->getMessageBody('html');
-//$attachments = $Parser->getAttachments();
-$attachments = $Parser->getAttachmentsAsStreams();
+$attachments = $Parser->getAttachments();
 
 // dump it so we can see
 var_dump(
@@ -30,3 +29,4 @@ var_dump(
 );
 
 ?>
+
