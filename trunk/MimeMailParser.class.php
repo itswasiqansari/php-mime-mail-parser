@@ -423,9 +423,9 @@ class MimeMailParser {
      * @param $encodingType     The encoding type from the Content-Transfer-Encoding header of the part.
      */
     private function decode($encodedString, $encodingType) {
-        if ($encodingType == 'base64') {
+        if (strtolower($encodingType) == 'base64') {
         	return base64_decode($encodedString);
-        } else if ($encodingType == 'quoted-printable') {
+        } else if (strtolower($encodingType) == 'quoted-printable') {
         	 return quoted_printable_decode($encodedString);
         } else {
         	return $encodedString;
