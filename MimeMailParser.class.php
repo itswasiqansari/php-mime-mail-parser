@@ -190,7 +190,7 @@ class MimeMailParser {
 			foreach($this->parts as $part) {
 				if ($this->getPartContentType($part) == $mime_types[$type]) {
                     $headers = $this->getPartHeaders($part);
-					$body = $this->decode($this->getPartBody($part), $headers['content-transfer-encoding']);
+					$body = $this->decode($this->getPartBody($part), array_key_exists('content-transfer-encoding', $headers) ? $headers['content-transfer-encoding'] : '');
 				}
 			}
 		} else {
@@ -384,7 +384,7 @@ class MimeMailParser {
 	private function getAttachmentStream(&$part) {
 		$temp_fp = tmpfile();   
 
-        $encoding = $part['headers']['content-transfer-encoding'];
+        array_key_exists('content-transfer-encoding', $part['headers']) ? $encoding = $part['headers']['content-transfer-encoding'] : $encoding = '';
 
 		if ($temp_fp) {
 			if ($this->stream) {
