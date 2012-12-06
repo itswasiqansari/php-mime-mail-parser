@@ -188,9 +188,7 @@ class MimeMailParser {
 		);
 		if (in_array($type, array_keys($mime_types))) {
 			foreach($this->parts as $part) {
-				if ($this->getPartContentType($part) == $mime_types[$type]
-					  && isset($part['content-disposition']) === FALSE
-				) {
+				if ($this->getPartContentType($part) == $mime_types[$type]) {
 					$headers = $this->getPartHeaders($part);
 					$body    = $this->decode($this->getPartBody($part), array_key_exists('content-transfer-encoding', $headers) ? $headers['content-transfer-encoding'] : '');
 					break;
@@ -236,9 +234,9 @@ class MimeMailParser {
 		$dispositions = array("attachment","inline");
 		foreach($this->parts as $part) {
 			$disposition = $this->getPartContentDisposition($part);
-			if (in_array($disposition, $dispositions)) {
+			if (in_array($disposition, $dispositions) === TRUE) {
 				$attachments[] = new MimeMailParser_attachment(
-					$part['disposition-filename'],
+					'dasasd',
 					$this->getPartContentType($part),
 					$this->getAttachmentStream($part),
 					$disposition,
