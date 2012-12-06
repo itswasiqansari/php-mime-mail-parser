@@ -234,9 +234,11 @@ class MimeMailParser {
 		$dispositions = array("attachment","inline");
 		foreach($this->parts as $part) {
 			$disposition = $this->getPartContentDisposition($part);
-			if (in_array($disposition, $dispositions) === TRUE) {
+			if (in_array($disposition, $dispositions) === TRUE
+				&& isset($part['disposition-filename']) === TRUE
+			) {
 				$attachments[] = new MimeMailParser_attachment(
-					'dasasd',
+					$part['disposition-filename'],
 					$this->getPartContentType($part),
 					$this->getAttachmentStream($part),
 					$disposition,
