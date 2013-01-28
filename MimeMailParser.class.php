@@ -215,6 +215,7 @@ class MimeMailParser {
 			foreach($this->parts as $part) {
 				if ($this->getPartContentType($part) == $mime_types[$type]) {
 					$headers = $this->getPartHeaders($part);
+					break;
 				}
 			}
 		} else {
