@@ -224,6 +224,28 @@ class MimeMailParser {
 		return $headers;
 	}
 
+	/**
+	 * Returns inline content files.
+	 * @return Array
+	 */
+	public function getInlineContent() {
+		$content = array();
+		foreach($this->parts as $part) {
+			$content_id = $this->getPartContentId($part);
+
+			if ($content_id !== FALSE) {
+				$content[] = new MimeMailParser_attachment(
+					$this->getPartContentName($part),
+					$this->getPartContentType($part),
+					$this->getAttachmentStream($part),
+					$this->getPartContentDisposition($part),
+					$this->getPartHeaders($part)
+				);
+			}
+		}
+
+		return $content;
+	}
 
 	/**
 	 * Returns the attachments contents in order of appearance
@@ -235,9 +257,12 @@ class MimeMailParser {
 		$dispositions = array("attachment","inline");
 		foreach($this->parts as $part) {
 			$disposition = $this->getPartContentDisposition($part);
-			if (in_array($disposition, $dispositions) === TRUE
-				&& isset($part['disposition-filename']) === TRUE
-			) {
+
+			if (in_array($disposition, $dispositions) === TRUE) {
+				if (isset($part['disposition-filename']) === FALSE) {
+					$part['disposition-filename'] = md5(uniqid());
+				}
+
 				$attachments[] = new MimeMailParser_attachment(
 					$part['disposition-filename'],
 					$this->getPartContentType($part),
@@ -247,6 +272,7 @@ class MimeMailParser {
 				);
 			}
 		}
+
 		return $attachments;
 	}
 
@@ -288,6 +314,18 @@ class MimeMailParser {
 	}
 
 	/**
+	 * Return the ContentName of the MIME part
+	 * @return String
+	 * @param $part Array
+	 */
+	private function getPartContentName($part) {
+		if (isset($part['content-name'])) {
+			return $part['content-name'];
+		}
+		return false;
+	}
+
+	/**
 	 * Return the Content Disposition
 	 * @return String
 	 * @param $part Array
@@ -295,6 +333,18 @@ class MimeMailParser {
 	private function getPartContentDisposition($part) {
 		if (isset($part['content-disposition'])) {
 			return $part['content-disposition'];
+		}
+		return false;
+	}
+
+	/**
+	 * Return the Content id
+	 * @return String
+	 * @param $part Array
+	 */
+	private function getPartContentId($part) {
+		if (isset($part['content-id'])) {
+			return $part['content-id'];
 		}
 		return false;
 	}
